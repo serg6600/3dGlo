@@ -138,7 +138,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	tabs();
 
 	//слайдер
-
 	const slider = () => {
 		const slide = document.querySelectorAll('.portfolio-item'),
 			btn = document.querySelectorAll('.portfolio-btn'),
@@ -232,7 +231,94 @@ window.addEventListener('DOMContentLoaded', () => {
 		startSlide(1500);
 
 	};
-
 	slider();
+
+	//смена фот команды
+	const command = () => {
+		const photos = document.querySelectorAll('.command__photo');
+		photos.forEach((item) => {
+			item.addEventListener('mouseenter', (e) => {
+				const dataSet = item.getAttribute('src');
+				e.target.src = e.target.dataset.img;
+				e.target.dataset.img = dataSet;
+			});
+		});
+		photos.forEach((item) => {
+			item.addEventListener('mouseleave', (e) => {
+				const dataSet = item.getAttribute('src');
+				e.target.src = e.target.dataset.img;
+				e.target.dataset.img = dataSet;
+			});
+		});
+	};
+	command();
+
+	//проверка полей после потери фокуса
+	const fieldCheck = (event) => {
+		let fieldValue = event.target.value;
+		fieldValue = fieldValue.replace(/\s+/g, ' ').trim();
+		fieldValue = fieldValue.replace(/-+/g, '-');
+		if (fieldValue[0] === '-') { fieldValue = fieldValue.slice(1); }
+		if (fieldValue[fieldValue.length-1] === '-') {fieldValue = fieldValue.slice(0, fieldValue.length-1); }
+		if (event.target.id === 'form2-name') {
+			let string = fieldValue.split(' ');
+			fieldValue = '';
+			string.forEach((item) => {
+				item = item[0].toUpperCase() + item.slice(1).toLowerCase();
+				fieldValue += item + ' ';
+			});
+			
+		}
+		event.target.value = fieldValue.trim();
+		};
+
+	//валидация калькулятора
+	const calcVerify = () => {
+		const fields = document.querySelectorAll('.calc-item');
+		fields.forEach((item) => {
+			if (item.tagName !== 'SELECT') {
+				item.addEventListener('input', () => {
+					item.value = item.value.replace(/\D/g, '');
+				});
+			}
+		});
+	};
+	calcVerify();
+
+	//валидация имени и формы отправки
+	const formVerify = () => {
+		const fieldName = document.getElementById('form2-name'),
+			fieldMessage = document.getElementById('form2-message'),
+			onlyCyrillic = (field) => {
+				field.addEventListener('input', () => {
+					field.value = field.value.replace(/[^а-яё|\s|-]/gi, '');
+				});
+			};
+		
+		onlyCyrillic(fieldName);
+		onlyCyrillic(fieldMessage);
+		fieldMessage.addEventListener('blur', fieldCheck);
+		fieldName.addEventListener('blur', fieldCheck);
+	};
+	formVerify();
+
+	//валидация е-мэйла
+	const emailVerify = () => {
+		const emailField = document.getElementById('form2-email');
+		emailField.addEventListener('input', () => {
+			emailField.value = emailField.value.replace(/[^a-z|@|_|\.|!|~|*|'|-]/gi, '');
+		});
+	};
+	emailVerify();
+
+	//валидация номера телефона
+	const numberVerify = () => {
+		const numberField = document.getElementById('form2-phone');
+		numberField.addEventListener('input', () => {
+			numberField.value = numberField.value.replace(/[^0-9|(|)|-]/g, '');
+		});
+		numberField.addEventListener('blur', fieldCheck);
+	};
+	numberVerify();
 
 });
