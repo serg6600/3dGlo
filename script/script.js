@@ -260,7 +260,8 @@ window.addEventListener('DOMContentLoaded', () => {
 		fieldValue = fieldValue.replace(/-+/g, '-');
 		if (fieldValue[0] === '-') { fieldValue = fieldValue.slice(1); }
 		if (fieldValue[fieldValue.length-1] === '-') {fieldValue = fieldValue.slice(0, fieldValue.length-1); }
-		if (event.target.id === 'form2-name') {
+		if (event.target.id === 'form2-name' || event.target.id === 'form1-name' ||
+			event.target.id === 'form3-name') {
 			let string = fieldValue.split(' ');
 			fieldValue = '';
 			string.forEach((item) => {
@@ -287,7 +288,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	//валидация имени и формы отправки
 	const formVerify = () => {
-		const fieldName = document.getElementById('form2-name'),
+		const fieldName1 = document.getElementById('form1-name'),
+			fieldName2 = document.getElementById('form2-name'),
+			fieldName3 = document.getElementById('form3-name'),
 			fieldMessage = document.getElementById('form2-message'),
 			onlyCyrillic = (field) => {
 				field.addEventListener('input', () => {
@@ -295,29 +298,43 @@ window.addEventListener('DOMContentLoaded', () => {
 				});
 			};
 		
-		onlyCyrillic(fieldName);
+		onlyCyrillic(fieldName1);
+		onlyCyrillic(fieldName2);
+		onlyCyrillic(fieldName3);
 		onlyCyrillic(fieldMessage);
 		fieldMessage.addEventListener('blur', fieldCheck);
-		fieldName.addEventListener('blur', fieldCheck);
+		fieldName1.addEventListener('blur', fieldCheck);
+		fieldName2.addEventListener('blur', fieldCheck);
+		fieldName3.addEventListener('blur', fieldCheck);
 	};
 	formVerify();
 
 	//валидация е-мэйла
 	const emailVerify = () => {
-		const emailField = document.getElementById('form2-email');
-		emailField.addEventListener('input', () => {
-			emailField.value = emailField.value.replace(/[^a-z|@|_|\.|!|~|*|'|-]/gi, '');
+		const emailFields = document.querySelectorAll('.form-email');
+		emailFields.forEach((item) => {
+			item.addEventListener('input', () => {
+				item.value = item.value.replace(/[^a-z|@|_|\.|!|~|*|'|-]/gi, '');
+			});
 		});
 	};
 	emailVerify();
 
 	//валидация номера телефона
 	const numberVerify = () => {
-		const numberField = document.getElementById('form2-phone');
-		numberField.addEventListener('input', () => {
-			numberField.value = numberField.value.replace(/[^0-9|(|)|-]/g, '');
-		});
-		numberField.addEventListener('blur', fieldCheck);
+		const numberField1 = document.getElementById('form1-phone'),
+			numberField2 = document.getElementById('form2-phone'),
+			numberField3 = document.getElementById('form3-phone'),
+			putListeners = (field) => {
+				field.addEventListener('input', () => {
+					field.value = field.value.replace(/[^0-9|(|)|-]/g, '');
+				});
+				field.addEventListener('blur', fieldCheck);
+			};
+		putListeners(numberField1);
+		putListeners(numberField2);
+		putListeners(numberField3);
+		
 	};
 	numberVerify();
 
