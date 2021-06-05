@@ -260,7 +260,8 @@ window.addEventListener('DOMContentLoaded', () => {
 		fieldValue = fieldValue.replace(/-+/g, '-');
 		if (fieldValue[0] === '-') { fieldValue = fieldValue.slice(1); }
 		if (fieldValue[fieldValue.length-1] === '-') {fieldValue = fieldValue.slice(0, fieldValue.length-1); }
-		if (event.target.id === 'form2-name') {
+		if (event.target.id === 'form2-name' || event.target.id === 'form1-name' ||
+			event.target.id === 'form3-name') {
 			let string = fieldValue.split(' ');
 			fieldValue = '';
 			string.forEach((item) => {
@@ -287,7 +288,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	//валидация имени и формы отправки
 	const formVerify = () => {
-		const fieldName = document.getElementById('form2-name'),
+		const fieldName1 = document.getElementById('form1-name'),
+			fieldName2 = document.getElementById('form2-name'),
+			fieldName3 = document.getElementById('form3-name'),
 			fieldMessage = document.getElementById('form2-message'),
 			onlyCyrillic = (field) => {
 				field.addEventListener('input', () => {
@@ -295,30 +298,87 @@ window.addEventListener('DOMContentLoaded', () => {
 				});
 			};
 		
-		onlyCyrillic(fieldName);
+		onlyCyrillic(fieldName1);
+		onlyCyrillic(fieldName2);
+		onlyCyrillic(fieldName3);
 		onlyCyrillic(fieldMessage);
 		fieldMessage.addEventListener('blur', fieldCheck);
-		fieldName.addEventListener('blur', fieldCheck);
+		fieldName1.addEventListener('blur', fieldCheck);
+		fieldName2.addEventListener('blur', fieldCheck);
+		fieldName3.addEventListener('blur', fieldCheck);
 	};
 	formVerify();
 
 	//валидация е-мэйла
 	const emailVerify = () => {
-		const emailField = document.getElementById('form2-email');
-		emailField.addEventListener('input', () => {
-			emailField.value = emailField.value.replace(/[^a-z|@|_|\.|!|~|*|'|-]/gi, '');
+		const emailFields = document.querySelectorAll('.form-email');
+		emailFields.forEach((item) => {
+			item.addEventListener('input', () => {
+				item.value = item.value.replace(/[^a-z|@|_|\.|!|~|*|'|-]/gi, '');
+			});
 		});
 	};
 	emailVerify();
 
 	//валидация номера телефона
 	const numberVerify = () => {
-		const numberField = document.getElementById('form2-phone');
-		numberField.addEventListener('input', () => {
-			numberField.value = numberField.value.replace(/[^0-9|(|)|-]/g, '');
-		});
-		numberField.addEventListener('blur', fieldCheck);
+		const numberField1 = document.getElementById('form1-phone'),
+			numberField2 = document.getElementById('form2-phone'),
+			numberField3 = document.getElementById('form3-phone'),
+			hangListeners = (field) => {
+				field.addEventListener('input', () => {
+					field.value = field.value.replace(/[^0-9|(|)|-]/g, '');
+				});
+				field.addEventListener('blur', fieldCheck);
+			};
+		hangListeners(numberField1);
+		hangListeners(numberField2);
+		hangListeners(numberField3);
+		
 	};
 	numberVerify();
 
+	//калькулятор
+	const calculator = (price = 100) => {
+
+		const calcBlock = document.querySelector('.calc-block'),
+			calcType = document.querySelector('.calc-type'),
+			calcSquare = document.querySelector('.calc-square'),
+			calcDay = document.querySelector('.calc-day'),
+			calcCount = document.querySelector('.calc-count'),
+			totalValue = document.getElementById('total');
+		
+		const countSum = () => {
+			let total = 0,
+				countValue = 1,
+				dayValue = 1;
+			const typeValue = calcType.options[calcType.selectedIndex].value,
+				squareValue = +calcSquare.value;
+
+			if(calcCount.value > 1) {
+				countValue += (calcCount.value - 1) / 10;
+			}
+
+			if (calcDay.value && calcDay.value < 5) {
+				dayValue *= 2;
+			} else if (calcDay.value && calcDay.value < 10) {
+				dayValue *= 1.5;
+			} 
+			
+			if (typeValue && squareValue){
+				total = price * typeValue * squareValue * countValue * dayValue;
+			} 
+
+			totalValue.textContent = total;
+		};
+
+		calcBlock.addEventListener('change', (event) => {
+			const target = event.target;
+			if (target.matches('.calc-type') || target.matches('.calc-square') ||
+				target.matches('.calc-day') || target.matches('.calc-count')) {
+				countSum();
+			}
+		});
+	};
+	calculator(100);
 });
