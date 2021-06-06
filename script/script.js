@@ -258,8 +258,10 @@ window.addEventListener('DOMContentLoaded', () => {
 		let fieldValue = event.target.value;
 		fieldValue = fieldValue.replace(/\s+/g, ' ').trim();
 		fieldValue = fieldValue.replace(/-+/g, '-');
+		fieldValue = fieldValue.replace(/\++/g, '+');
 		if (fieldValue[0] === '-') { fieldValue = fieldValue.slice(1); }
 		if (fieldValue[fieldValue.length-1] === '-') {fieldValue = fieldValue.slice(0, fieldValue.length-1); }
+
 		if (event.target.id === 'form2-name' || event.target.id === 'form1-name' ||
 			event.target.id === 'form3-name') {
 			let string = fieldValue.split(' ');
@@ -297,15 +299,16 @@ window.addEventListener('DOMContentLoaded', () => {
 					field.value = field.value.replace(/[^а-яё|\s|-]/gi, '');
 				});
 			};
-		
 		onlyCyrillic(fieldName1);
 		onlyCyrillic(fieldName2);
 		onlyCyrillic(fieldName3);
-		onlyCyrillic(fieldMessage);
-		fieldMessage.addEventListener('blur', fieldCheck);
 		fieldName1.addEventListener('blur', fieldCheck);
 		fieldName2.addEventListener('blur', fieldCheck);
 		fieldName3.addEventListener('blur', fieldCheck);
+
+		fieldMessage.addEventListener('input', () => {
+			fieldMessage.value = fieldMessage.value.replace(/[^а-яё|0-9|\s|,|.|!|?]/gi, '');
+		});
 	};
 	formVerify();
 
@@ -327,7 +330,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			numberField3 = document.getElementById('form3-phone'),
 			putListeners = (field) => {
 				field.addEventListener('input', () => {
-					field.value = field.value.replace(/[^0-9|(|)|-]/g, '');
+					field.value = field.value.replace(/[^0-9|+]/g, '');
 				});
 				field.addEventListener('blur', fieldCheck);
 			};
@@ -381,4 +384,63 @@ window.addEventListener('DOMContentLoaded', () => {
 		});
 	};
 	calculator(100);
+
+	//send-ajax-form
+	const sendForm = () => {
+		const errorMessage = 'Что-то пошло не так...',
+			loadMessage = 'Загрузка...',
+			successMessage = 'Спасибо! Мы скоро с вами свяжемся!',
+			form = document.getElementById('form1'),
+			form2 = document.getElementById('form2'),
+			form3 = document.getElementById('form3'),
+			statusMessage = document.createElement('div');
+		statusMessage.style.cssText = 'font-size: 2rem;';
+
+		const postData = (body, outputData, errorData) => {
+			const request = new XMLHttpRequest();
+			request.addEventListener('readystatechange', () => {
+				if (request.readyState !== 4) { return; }
+				if (request.status === 200) {
+					outputData();
+				} else {
+					errorData(request.status);
+				}
+			});
+			request.open('POST', './server.php');
+			request.setRequestHeader('Content-Type', 'application/json');
+			request.send(JSON.stringify(body));
+		};
+
+		const submitEvent = (event, form) => {
+			event.preventDefault();
+			form.appendChild(statusMessage);
+			statusMessage.textContent = loadMessage;
+			const formData = new FormData(form);
+			let body = {};
+			for(let val of formData.entries()){
+				body[val[0]] = val[1];
+			}
+			postData(body, () => {
+				statusMessage.textContent = successMessage;
+			}, (error) => {
+				statusMessage.textContent = errorMessage;
+				console.log(error);
+			});
+			const inputs = form.querySelectorAll('input');
+			inputs.forEach(item => {
+				item.value = '';
+			});
+		};
+
+		form.addEventListener('submit', (event) => {
+			submitEvent(event, form);
+		} );
+		form2.addEventListener('submit', (event) => {
+			submitEvent(event, form2);
+		} );
+		form3.addEventListener('submit', (event) => {
+			submitEvent(event, form3);
+		} );
+	};
+	sendForm();
 });
