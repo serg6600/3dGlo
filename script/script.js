@@ -352,8 +352,15 @@ window.addEventListener('DOMContentLoaded', () => {
 					field.value = field.value.replace(/[^0-9|+]/g, '');
 					if (field.value) {
 						field.value = field.value[0] + field.value.slice(1).replace(/\+/g, '');
+						if (field.value[0] === '+' && field.value.length > 12) {
+							alert('Необходимо ввести корректную длину номера');
+							field.value = field.value.slice(0, field.value.length-1);
+						}
+						if (field.value[0] !== '+' && field.value.length > 11) {
+							alert('Необходимо ввести корректную длину номера');
+							field.value = field.value.slice(0, field.value.length-1);
+						}
 					}
-					
 				});
 				field.addEventListener('blur', fieldCheck);
 			};
@@ -424,47 +431,43 @@ window.addEventListener('DOMContentLoaded', () => {
 
 			const postData = (body) => {
 
-				return new Promise( (resolve, reject) => {
-
-					const request = new XMLHttpRequest();
-					request.addEventListener('readystatechange', () => {
-						if (request.readyState !== 4) { return; }
-						if (request.status === 200) {
-							resolve(request);
-						} else {
-							reject(request.status);
-						}
-					});
-					request.open('POST', './server.php');
-					request.setRequestHeader('Content-Type', 'application/json');
-					request.send(JSON.stringify(body));
+				return fetch('./server.php',{
+					method: 'POST',
+					headers: { 'Content-Type': 'multipart/form-data'},
+					body: body
 				});
 			};
 
 			const submitEvent = (event, form) => {
-				const formData = new FormData(form);
 				event.preventDefault();
-				let body = {};
-				for(let val of formData.entries()){
-					body[val[0]] = val[1];
-					if (val[1] === '') {
-						alert('Необходимо заполнить все поля');
-						return;
-					}
+
+				//проверка на минимальную длину номера
+				const phone = form.querySelector('.form-phone').value;
+				if (phone[0] === '+' && phone.length < 8) {
+					alert('Необходимо ввести корректную длину номера');
+					return;
 				}
+				if (phone[0] !== '+' && phone.length < 7) {
+					alert('Необходимо ввести корректную длину номера');
+					return;
+				}//
+
+				const formData = new FormData(form);
 				form.appendChild(statusMessage);
 				statusMessage.textContent = loadMessage;
 				const inputs = form.querySelectorAll('input');
 				inputs.forEach(item => {
 					item.value = '';
 				});
-				postData(body).then( () => {
+				postData(formData).then( (response) => {
+					if (response.status !== 200) {
+						throw new Error('network status is not 200');
+					}
 					statusMessage.textContent = successMessage;
 					setTimeout( ()=> { statusMessage.remove(); }, 3000);
-				}, (error) => {
+				}).catch( (error) => {
 					statusMessage.textContent = errorMessage;
 					setTimeout( ()=> { statusMessage.remove(); }, 3000);
-					console.log(error);
 				});
 			};
 			
