@@ -23,8 +23,14 @@ const sendForm = () => {
         const submitEvent = (event, form) => {
             event.preventDefault();
 
-            //проверка на минимальную длину номера
-            const phone = form.querySelector('.form-phone').value;
+            //проверка на минимальную длину номера и пустые формы
+            const phone = form.querySelector('.form-phone').value,
+                email = form.querySelector('.form-email').value,
+                name = form.querySelector('.form-name').value;
+            if(!phone || !name || !email){ 
+                alert('Необходимо заполнить все поля');
+                return; 
+            }
             if (phone[0] === '+' && phone.length < 8) {
                 alert('Необходимо ввести корректную длину номера');
                 return;
